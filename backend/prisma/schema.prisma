@@ -1,0 +1,185 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum YesNoMaybe {
+  YES
+  NO
+  MAYBE
+}
+
+enum MaritalStatus {
+  NEVER_MARRIED
+  DIVORCED
+  WIDOWED
+  SEPARATED
+}
+
+enum StatusTag {
+  NEW
+  VERIFIED
+  IN_REVIEW
+  MATCHES_READY
+  MATCH_SENT
+  ON_HOLD
+}
+
+enum MatchStatus {
+  SUGGESTED
+  SENT
+  ACCEPTED
+  REJECTED
+  ARCHIVED
+}
+
+model Matchmaker {
+  id String @id @default(uuid())
+
+  name  String
+  email String @unique
+
+  customers Customer[]
+  notes     MatchmakerNote[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id String @id @default(uuid())
+
+  assignedMatchmakerId String?
+  assignedMatchmaker   Matchmaker? @relation(fields: [assignedMatchmakerId], references: [id], onDelete: SetNull) // A customer may or may not have an assigned matchmaker
+
+  firstName   String
+  lastName    String
+  gender      Gender
+  dateOfBirth DateTime
+
+  country  String
+  city     String
+  heightCm Int
+
+  email String @unique
+  phone String
+
+  college     String
+  degree      String
+  incomeLpa   Int
+  company     String
+  designation String
+
+  maritalStatus  MaritalStatus
+  languagesKnown String[]
+  siblingsCount Int?
+
+  caste    String?
+  religion String?
+
+  wantKids      YesNoMaybe
+  openToRelocate YesNoMaybe
+  openToPets     YesNoMaybe
+
+  diet             String?
+  smoking          String?
+  drinking         String?
+  relationshipGoal String?
+  marriageTimeline String?
+  personalityType  String?
+  familyPreference String?
+
+  values String[]
+  photos String[]
+
+  statusTag       StatusTag @default(NEW)
+  profileVerified Boolean   @default(false)
+
+  preferences CustomerPreference?
+  notes       MatchmakerNote[]
+
+  matchesForThisCustomer MatchSuggestion[] @relation("CustomerMatches") // All matches where this customer is the one being matched
+  suggestedToOthers      MatchSuggestion[] @relation("SuggestedMatches") // All matches where this customer is the one being suggested as a match to others
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CustomerPreference {
+  id String @id @default(uuid())
+
+  customerId String @unique
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  preferredAgeMin Int?
+  preferredAgeMax Int?
+
+  preferredHeightMin Int?
+  preferredHeightMax Int?
+
+  preferredIncomeMin Int?
+
+  preferredCities    String[]
+  preferredCountries String[]
+
+  preferredReligions String[]
+  preferredCastes    String[]
+  preferredDiets     String[]
+
+  dealBreakers String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MatchSuggestion {
+  id String @id @default(uuid())
+
+  customerId String
+  customer   Customer @relation("CustomerMatches", fields: [customerId], references: [id], onDelete: Cascade)
+
+  suggestedCustomerId String
+  suggestedCustomer   Customer @relation("SuggestedMatches", fields: [suggestedCustomerId], references: [id], onDelete: Cascade)
+
+  score Int
+  label String
+
+  reasons String[] 
+
+  aiExplanation String?
+  introEmail    String?
+
+  status MatchStatus @default(SUGGESTED)
+
+  createdAt DateTime @default(now())
+  sentAt    DateTime?
+}
+
+model MatchmakerNote {
+  id String @id @default(uuid())
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  matchmakerId String
+  matchmaker   Matchmaker @relation(fields: [matchmakerId], references: [id], onDelete: Cascade)
+
+  note String
+
+  createdAt DateTime @default(now())
+}
