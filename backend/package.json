@@ -4,7 +4,12 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun run server.js"
+    "start": "bun run server.js",
+    "dev": "bun run server.js --watch",
+    "seed": "bun run prisma/seed/seed.js",
+    "migrate": "bun prisma migrate dev",
+    "generate": "bun prisma generate",
+    "reset-db": "bun prisma migrate reset"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -15,6 +20,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.4.0",
     "@prisma/adapter-libsql": "^7.8.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
@@ -23,6 +29,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "openai": "^6.42.0",
-    "pg": "^8.21.0"
+    "pg": "^8.21.0",
+    "resend": "^6.12.4"
   }
 }

@@ -25,7 +25,7 @@ enum YesNoMaybe {
 }
 
 enum MaritalStatus {
-  NEVER_MARRIED
+  SINGLE
   DIVORCED
   WIDOWED
   SEPARATED
